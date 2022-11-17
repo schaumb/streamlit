@@ -58,6 +58,7 @@ from streamlit.runtime.caching import (
     singleton as _singleton,
     memo as _memo,
 )
+from streamlit.runtime.connection import connection as _connection
 from streamlit.runtime.metrics_util import gather_metrics as _gather_metrics
 from streamlit.runtime.secrets import secrets_singleton as _secrets_singleton
 from streamlit.runtime.state import SessionStateProxy as _SessionStateProxy
@@ -204,3 +205,6 @@ experimental_get_query_params = _get_query_params
 experimental_set_query_params = _set_query_params
 experimental_show = _show
 experimental_rerun = _rerun
+
+# WIP st.connection
+connection = _connection
