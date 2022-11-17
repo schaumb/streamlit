@@ -14,7 +14,21 @@
 
 
 import streamlit as st
+from streamlit.dbadapters.sqlite import SQLiteAdapter as sqlite
 
 
 def connection():
     st.write("Inside the Connection API ✅")
+    connection, cursor = sqlite.connect("test.db")
+    st.write("Connection:")
+    st.write(connection)
+    st.write("Cursor:")
+    st.write(cursor)
+    result = sqlite.is_connected(connection)
+    st.write("Is Connected?")
+    st.write(result)
+    sqlite.close(connection)
+    st.write("Connection Closed")
+    result = sqlite.is_connected(connection)
+    st.write("Is Connected?")
+    st.write(result)
