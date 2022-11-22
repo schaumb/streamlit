@@ -16,7 +16,7 @@ import sqlite3
 
 
 class SQLiteAdapter:
-    def connect(database_name: str) -> (sqlite3.Connection, sqlite3.Cursor):
+    def connect(self, database_name: str) -> (sqlite3.Connection, sqlite3.Cursor):
         """
         Create an sqlite connection to the database provided in the
         current working directory or create it if it does not exist.
@@ -27,7 +27,7 @@ class SQLiteAdapter:
         cursor = connection.cursor()
         return connection, cursor
 
-    def is_connected(connection: sqlite3.Connection) -> bool:
+    def is_connected(self, connection: sqlite3.Connection) -> bool:
         """Test if an sqlite connection is active"""
         try:
             connection.cursor()
@@ -35,6 +35,6 @@ class SQLiteAdapter:
         except Exception:
             return False
 
-    def close(connection: sqlite3.Connection) -> None:
+    def close(self, connection: sqlite3.Connection) -> None:
         """Close the sqlite connection"""
         connection.close()

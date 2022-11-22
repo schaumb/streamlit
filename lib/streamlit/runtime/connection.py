@@ -12,23 +12,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import importlib
 
 import streamlit as st
-from streamlit.dbadapters.sqlite import SQLiteAdapter as sqlite
+from streamlit.runtime.caching import singleton
 
 
-def connection():
+def _retrieve_secrets(connection_name: str):
+    return getattr(st.secrets.connection, connection_name)
+
+
+def _import_adapter(connection_name, secret_values):
+    module_path = secret_values.adapter.split(".")
+    module_name = ".".join(module_path[0:-1])
+    class_name = module_path[-1]
+
+    module = importlib.import_module(module_name)
+    Adapter = getattr(module, class_name)
+    # TODO: share remaining secrets values
+    database_name = secret_values.database_name
+    return Adapter, database_name
+
+
+@singleton
+def _get_connection(connection_name, **kwargs):
+    secret_values = _retrieve_secrets(connection_name)
+    Adapter, database_name = _import_adapter(connection_name, secret_values)
+    adapter_instance = Adapter()
+    connection, cursor = adapter_instance.connect(database_name)
+    return adapter_instance, connection, cursor
+
+
+def connection(connection_name: str, **kwargs):
     st.write("Inside the Connection API ✅")
-    connection, cursor = sqlite.connect("test.db")
-    st.write("Connection:")
-    st.write(connection)
-    st.write("Cursor:")
-    st.write(cursor)
-    result = sqlite.is_connected(connection)
-    st.write("Is Connected?")
-    st.write(result)
-    sqlite.close(connection)
-    st.write("Connection Closed")
-    result = sqlite.is_connected(connection)
-    st.write("Is Connected?")
-    st.write(result)
+    adapter, connection, cursor = _get_connection(connection_name, **kwargs)
+
+    if not adapter.is_connected(connection):
+        _get_connection.clear()
+        adapter, connection, cursor = _get_connection(connection_name, **kwargs)
+
+    return connection, cursor
