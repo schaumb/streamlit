@@ -20,6 +20,10 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Union, cast
 from typing_extensions import Literal
 
 from streamlit import config
+from streamlit.runtime.connection import (
+    _is_dataframe_conversion_available,
+    try_convert_to_dataframe,
+)
 from streamlit.runtime.metrics_util import gather_metrics
 
 if TYPE_CHECKING:
@@ -107,6 +111,9 @@ class DataFrameSelectorMixin:
            height: 410px
 
         """
+        if _is_dataframe_conversion_available(data):
+            data = try_convert_to_dataframe(type(data), data)
+
         if _use_arrow():
             return self.dg._arrow_dataframe(
                 data, width, height, use_container_width=use_container_width
@@ -146,6 +153,9 @@ class DataFrameSelectorMixin:
            height: 480px
 
         """
+        if _is_dataframe_conversion_available(data):
+            data = try_convert_to_dataframe(type(data), data)
+
         if _use_arrow():
             return self.dg._arrow_table(data)
         else:
@@ -220,6 +230,9 @@ class DataFrameSelectorMixin:
            height: 400px
 
         """
+        if _is_dataframe_conversion_available(data):
+            data = try_convert_to_dataframe(type(data), data)
+
         if _use_arrow():
             return self.dg._arrow_line_chart(
                 data,
@@ -306,6 +319,9 @@ class DataFrameSelectorMixin:
            height: 400px
 
         """
+        if _is_dataframe_conversion_available(data):
+            data = try_convert_to_dataframe(type(data), data)
+
         if _use_arrow():
             return self.dg._arrow_area_chart(
                 data,
@@ -392,6 +408,8 @@ class DataFrameSelectorMixin:
            height: 400px
 
         """
+        if _is_dataframe_conversion_available(data):
+            data = try_convert_to_dataframe(type(data), data)
 
         if _use_arrow():
             return self.dg._arrow_bar_chart(
@@ -527,6 +545,9 @@ class DataFrameSelectorMixin:
         translated to the syntax shown above.
 
         """
+        if _is_dataframe_conversion_available(data):
+            data = try_convert_to_dataframe(type(data), data)
+
         if _use_arrow():
             return self.dg._arrow_vega_lite_chart(
                 data, spec, use_container_width, theme, **kwargs
@@ -592,6 +613,9 @@ class DataFrameSelectorMixin:
         >>> my_chart.add_rows(some_fancy_name=df2)  # <-- name used as keyword
 
         """
+        if _is_dataframe_conversion_available(data):
+            data = try_convert_to_dataframe(type(data), data)
+
         if _use_arrow():
             return self.dg._arrow_add_rows(data, **kwargs)
         else:
