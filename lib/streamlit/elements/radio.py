@@ -218,7 +218,7 @@ class RadioMixin:
         maybe_raise_label_warnings(label, label_visibility)
 
         if _is_dataframe_conversion_available(options):
-            options = try_convert_to_dataframe(type(options), options)
+            options = try_convert_to_dataframe(options)
 
         opt = ensure_indexable(options)
 

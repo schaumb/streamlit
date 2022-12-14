@@ -183,7 +183,7 @@ class WriteMixin:
 
         for arg in args:
             if _is_dataframe_conversion_available(arg):
-                arg = try_convert_to_dataframe(type(arg), arg)
+                arg = try_convert_to_dataframe(arg)
 
             # Order matters!
             if isinstance(arg, str):

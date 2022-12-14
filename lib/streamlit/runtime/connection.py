@@ -18,16 +18,8 @@ import streamlit as st
 from streamlit.runtime.caching import singleton
 
 
-def _retrieve_secrets(connection_name: str):
-    return getattr(st.secrets.connection, connection_name)
-
-
-def _retrieve_credentials(secrets):
-    return secrets.credentials
-
-
-def _import_adapter(connection_name, secret_values):
-    module_path = secret_values.adapter.split(".")
+def _import_adapter(adapter_path: str):
+    module_path = adapter_path.split(".")
     module_name = ".".join(module_path[0:-1])
     class_name = module_path[-1]
 
@@ -38,19 +30,20 @@ def _import_adapter(connection_name, secret_values):
 
 @singleton
 def _get_connection(connection_name, **kwargs):
-    secret_values = _retrieve_secrets(connection_name)
-    Adapter = _import_adapter(connection_name, secret_values)
-    adapter_instance = Adapter()
-    if connection_name == "sqlite":
-        # SQLLite takes a database name
-        database_name = secret_values.database_name
-        connection, cursor = adapter_instance.connect(database_name)
-    if connection_name == "bigquery":
-        # BigQuery takes connection credentials
-        credentials = _retrieve_credentials(secret_values)
-        connection, cursor = adapter_instance.connect(credentials)
+    secret_values = getattr(st.secrets.connection, connection_name)
+    Adapter = _import_adapter(secret_values.adapter)
 
-    return adapter_instance, connection, cursor
+    adapter_kwargs = {
+        i: kwargs.get(i, secret_values[i]) for i in secret_values if i != "adapter"
+    }
+
+    # Providing the streamlit module for access to the plugin interface
+    import streamlit
+
+    adapter_instance = Adapter(streamlit)
+    adapter_output = adapter_instance.connect(**adapter_kwargs)
+
+    return adapter_instance, adapter_output
 
 
 @singleton
@@ -64,16 +57,26 @@ def register_data_type(from_type: str, to_type: str, conversion_func):
     mapping[from_type][to_type] = conversion_func
 
 
+def classname(obj) -> str:
+    cls = type(obj)
+    module = cls.__module__
+    name = cls.__qualname__
+    if module is not None and module != "__builtin__":
+        name = module + "." + name
+    return name
+
+
 def _is_dataframe_conversion_available(data) -> bool:
     mapping = dataframe_conversion_mapping()
-    if mapping.get(str(type(data)), None) is None:
+    print(classname(data))
+    if mapping.get(classname(data), None) is None:
         return False
     return True
 
 
-def try_convert_to_dataframe(data_type, data):
+def try_convert_to_dataframe(data):
     mapping = dataframe_conversion_mapping()
-    conversion_func = mapping.get(str(data_type), {}).get(
+    conversion_func = mapping.get(classname(data), {}).get(
         "pandas.core.frame.DataFrame", None
     )
 
@@ -84,11 +87,11 @@ def try_convert_to_dataframe(data_type, data):
 
 
 def connection(connection_name: str, **kwargs):
-    adapter, connection, cursor = _get_connection(connection_name, **kwargs)
+    adapter, adapter_output = _get_connection(connection_name, **kwargs)
 
-    if not adapter.is_connected(connection):
+    if not adapter.is_connected(adapter_output):
         _get_connection.clear()
         dataframe_conversion_mapping.clear()
-        adapter, connection, cursor = _get_connection(connection_name, **kwargs)
+        adapter, adapter_output = _get_connection(connection_name, **kwargs)
 
-    return connection, cursor
+    return adapter_output

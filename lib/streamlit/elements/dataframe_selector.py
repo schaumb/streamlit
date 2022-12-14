@@ -112,7 +112,7 @@ class DataFrameSelectorMixin:
 
         """
         if _is_dataframe_conversion_available(data):
-            data = try_convert_to_dataframe(type(data), data)
+            data = try_convert_to_dataframe(data)
 
         if _use_arrow():
             return self.dg._arrow_dataframe(
@@ -154,7 +154,7 @@ class DataFrameSelectorMixin:
 
         """
         if _is_dataframe_conversion_available(data):
-            data = try_convert_to_dataframe(type(data), data)
+            data = try_convert_to_dataframe(data)
 
         if _use_arrow():
             return self.dg._arrow_table(data)
@@ -231,7 +231,7 @@ class DataFrameSelectorMixin:
 
         """
         if _is_dataframe_conversion_available(data):
-            data = try_convert_to_dataframe(type(data), data)
+            data = try_convert_to_dataframe(data)
 
         if _use_arrow():
             return self.dg._arrow_line_chart(
@@ -320,7 +320,7 @@ class DataFrameSelectorMixin:
 
         """
         if _is_dataframe_conversion_available(data):
-            data = try_convert_to_dataframe(type(data), data)
+            data = try_convert_to_dataframe(data)
 
         if _use_arrow():
             return self.dg._arrow_area_chart(
@@ -409,7 +409,7 @@ class DataFrameSelectorMixin:
 
         """
         if _is_dataframe_conversion_available(data):
-            data = try_convert_to_dataframe(type(data), data)
+            data = try_convert_to_dataframe(data)
 
         if _use_arrow():
             return self.dg._arrow_bar_chart(
@@ -546,7 +546,7 @@ class DataFrameSelectorMixin:
 
         """
         if _is_dataframe_conversion_available(data):
-            data = try_convert_to_dataframe(type(data), data)
+            data = try_convert_to_dataframe(data)
 
         if _use_arrow():
             return self.dg._arrow_vega_lite_chart(
@@ -614,7 +614,7 @@ class DataFrameSelectorMixin:
 
         """
         if _is_dataframe_conversion_available(data):
-            data = try_convert_to_dataframe(type(data), data)
+            data = try_convert_to_dataframe(data)
 
         if _use_arrow():
             return self.dg._arrow_add_rows(data, **kwargs)

@@ -12,55 +12,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import google.cloud.bigquery as bigquery
-import google.cloud.bigquery.dbapi as bq_dbapi
 import pandas as pd
 from google.oauth2 import service_account
 
 from streamlit.runtime.connection import register_data_type
 
 # Main docs: https://cloud.google.com/python/docs/reference/bigquery/latest
-# DBAPI docs: https://googleapis.dev/python/bigquery/latest/dbapi.html
-#               https://cloud.google.com/python/docs/reference/bigquery/latest/google.cloud.bigquery.dbapi
 # Auth docs: https://googleapis.dev/python/google-auth/latest/user-guide.html
 
 
 class BigQueryAdapter:
-    def __init__(self):
-        register_data_type(
-            str(bq_dbapi.Cursor),
+    def __init__(self, st):
+        st.runtime.connection.register_data_type(
+            "google.cloud.bigquery.job.query.QueryJob",
             "pandas.core.frame.DataFrame",
             self.convert_to_dataframe,
         )
 
-    def connect(self, credentials) -> (bq_dbapi.Connection, bq_dbapi.Cursor):
+    def connect(self, credentials=None) -> bigquery.client.Client:
         """
         Returns the BigQuery connection & cursor used to perform queries
         """
         creds = service_account.Credentials.from_service_account_info(credentials)
-        Client = bigquery.Client(credentials=creds)
+        client = bigquery.Client(credentials=creds)
 
-        connection = bq_dbapi.Connection(Client)
-        cursor = connection.cursor()
-        return connection, cursor
+        return client
 
-    def is_connected(self, connection: bq_dbapi.Connection) -> bool:
+    def is_connected(self, client: bigquery.client.Client) -> bool:
         """Test if an BigQuery connection is active"""
-        try:
-            # Per docs: This is a no-op, but for consistency raises an error if connection is closed
-            # https://cloud.google.com/python/docs/reference/bigquery/latest/google.cloud.bigquery.dbapi.Connection#google_cloud_bigquery_dbapi_Connection_commit
-            connection.commit()
-            return True
-        except Exception:
-            return False
+        # BigQuery client will always make a connection even if closed.
+        # See https://cloud.google.com/python/docs/reference/bigquery/latest/google.cloud.bigquery.client.Client#google_cloud_bigquery_client_Client_close
+        return True
 
-    def close(self, connection: bq_dbapi.Connection) -> None:
+    def close(self, client: bigquery.client.Client) -> None:
         """
         Close the BigQuery connection and any cursors created from it.
         """
-        connection.close()
+        client.close()
 
     def convert_to_dataframe(self, output) -> pd.DataFrame:
-        # https://googleapis.dev/python/bigquery/latest/usage/pandas.html
-        # TODO: Test if to_dataframe() call still works with dbapi
         return output.to_dataframe()

@@ -13,35 +13,36 @@
 # limitations under the License.
 
 import sqlite3
+from typing import Tuple
 
 import pandas as pd
 
-from streamlit.runtime.connection import register_data_type
-
 
 class SQLiteAdapter:
-    def __init__(self):
-        register_data_type(
-            str(sqlite3.Cursor),
+    def __init__(self, st):
+        st.runtime.connection.register_data_type(
+            "sqlite3.Cursor",
             "pandas.core.frame.DataFrame",
             self.convert_to_dataframe,
         )
 
-    def connect(self, database_name: str) -> (sqlite3.Connection, sqlite3.Cursor):
+    def connect(self, database: str = "") -> Tuple[sqlite3.Connection, sqlite3.Cursor]:
         """
         Create an sqlite connection to the database provided in the
         current working directory or create it if it does not exist.
         """
         # returns the Connection object
-        connection = sqlite3.connect(database_name)
+        connection = sqlite3.connect(database)
         # returns the database cursor used to execute SQL statements & fetch results from SQL queries
         cursor = connection.cursor()
         return connection, cursor
 
-    def is_connected(self, connection: sqlite3.Connection) -> bool:
+    def is_connected(
+        self, connection: Tuple[sqlite3.Connection, sqlite3.Cursor]
+    ) -> bool:
         """Test if an sqlite connection is active"""
         try:
-            connection.cursor()
+            connection[0].cursor()
             return True
         except Exception:
             return False

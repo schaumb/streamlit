@@ -131,7 +131,7 @@ class MapMixin:
         map_proto = DeckGlJsonChartProto()
 
         if _is_dataframe_conversion_available(data):
-            data = try_convert_to_dataframe(type(data), data)
+            data = try_convert_to_dataframe(data)
 
         map_proto.json = to_deckgl_json(data, zoom)
         map_proto.use_container_width = use_container_width
