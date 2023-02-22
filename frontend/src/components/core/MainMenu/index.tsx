@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
-export { default, isLocalhost } from "./MainMenu"
+export { default } from "./MainMenu"
+export { isLocalhost } from "./MainMenu"

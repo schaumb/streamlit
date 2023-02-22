@@ -43,48 +43,48 @@ import { ConnectionState } from "src/lib/ConnectionState"
 import { ScriptRunState } from "src/lib/ScriptRunState"
 import { SessionEventDispatcher } from "src/lib/SessionEventDispatcher"
 import {
-  setCookie,
+  generateUID,
+  getElementWidgetID,
+  getEmbeddingIdClassName,
   getIFrameEnclosingApp,
   hashString,
-  isEmbed,
-  isPaddingDisplayed,
-  isToolbarDisplayed,
   isColoredLineDisplayed,
-  isScrollingHidden,
-  isFooterDisplayed,
-  isLightTheme,
   isDarkTheme,
+  isEmbed,
+  isFooterDisplayed,
   isInChildFrame,
+  isLightTheme,
+  isPaddingDisplayed,
+  isScrollingHidden,
+  isToolbarDisplayed,
   notUndefined,
-  getElementWidgetID,
-  generateUID,
-  getEmbeddingIdClassName,
+  setCookie,
   extractPageNameFromPathName,
 } from "src/lib/utils"
 import { BaseUriParts } from "src/lib/UriUtil"
 import {
+  AppPage,
   BackMsg,
+  Config,
   CustomThemeConfig,
   Delta,
   ForwardMsg,
   ForwardMsgMetadata,
+  GitInfo,
+  IAppPage,
+  IGitInfo,
   Initialize,
   NewSession,
   PageConfig,
   PageInfo,
   PageNotFound,
-  PagesChanged,
   PageProfile,
+  PagesChanged,
   SessionEvent,
-  WidgetStates,
   SessionStatus,
-  Config,
-  IGitInfo,
-  GitInfo,
-  IAppPage,
-  AppPage,
+  WidgetStates,
 } from "src/autogen/proto"
-import { without, concat, noop } from "lodash"
+import { concat, noop, without } from "lodash"
 
 import { RERUN_PROMPT_MODAL_DIALOG } from "src/lib/baseconsts"
 import { SessionInfo } from "src/lib/SessionInfo"
@@ -97,10 +97,10 @@ import { ComponentRegistry } from "src/components/widgets/CustomComponent"
 import { handleFavicon } from "src/components/elements/Favicon"
 
 import {
-  CUSTOM_THEME_NAME,
   createAutoTheme,
   createPresetThemes,
   createTheme,
+  CUSTOM_THEME_NAME,
   getCachedTheme,
   isPresetTheme,
   ThemeConfig,
@@ -148,9 +148,9 @@ interface State {
   layout: PageConfig.Layout
   initialSidebarState: PageConfig.SidebarState
   menuItems?: PageConfig.IMenuItems | null
-  allowRunOnSave: boolean
+  allowRunOnSave: boolean | null | undefined
   scriptFinishedHandlers: (() => void)[]
-  developerMode: boolean
+  toolbarMode: Config.ToolbarMode
   themeHash: string | null
   gitInfo: IGitInfo | null
   formsData: FormsData
@@ -169,6 +169,22 @@ declare global {
     streamlitDebug: any
     iFrameResizer: any
   }
+}
+
+export const showDevelopmentMenu = (
+  hostIsOwner: boolean | undefined,
+  toolbarMode: Config.ToolbarMode
+): boolean => {
+  if (toolbarMode == Config.ToolbarMode.DEVELOPER) {
+    return true
+  }
+  if (
+    Config.ToolbarMode.VIEWER == toolbarMode ||
+    Config.ToolbarMode.MINIMAL == toolbarMode
+  ) {
+    return false
+  }
+  return hostIsOwner || isLocalhost()
 }
 
 export class App extends PureComponent<Props, State> {
@@ -226,9 +242,6 @@ export class App extends PureComponent<Props, State> {
       menuItems: undefined,
       allowRunOnSave: true,
       scriptFinishedHandlers: [],
-      // A hack for now to get theming through. Product to think through how
-      // developer mode should be designed in the long term.
-      developerMode: window.location.host.includes("localhost"),
       themeHash: null,
       gitInfo: null,
       formsData: createFormsData(),
@@ -242,6 +255,7 @@ export class App extends PureComponent<Props, State> {
       // true as well for consistency.
       hideTopBar: true,
       hideSidebarNav: true,
+      toolbarMode: Config.ToolbarMode.MINIMAL,
       latestRunTime: performance.now(),
     }
 
@@ -296,7 +310,12 @@ export class App extends PureComponent<Props, State> {
       this.rerunScript()
     },
     CLEAR_CACHE: () => {
-      if (isLocalhost() || this.props.hostCommunication.currentState.isOwner) {
+      if (
+        showDevelopmentMenu(
+          this.props.hostCommunication.currentState.isOwner,
+          this.state.toolbarMode
+        )
+      ) {
         this.openClearCacheDialog()
       }
     },
@@ -713,11 +732,18 @@ export class App extends PureComponent<Props, State> {
       RERUN_PROMPT_MODAL_DIALOG &&
       sessionEvent.type === "scriptChangedOnDisk"
     ) {
+      const allowRunOnSave =
+        typeof this.state.allowRunOnSave === "boolean"
+          ? this.state.allowRunOnSave
+          : showDevelopmentMenu(
+              this.props.hostCommunication.currentState.isOwner,
+              this.state.toolbarMode
+            )
       const newDialog: DialogProps = {
         type: DialogType.SCRIPT_CHANGED,
         onRerun: this.rerunScript,
         onClose: () => {},
-        allowRunOnSave: this.state.allowRunOnSave,
+        allowRunOnSave: allowRunOnSave,
       }
       this.openDialog(newDialog)
     }
@@ -793,6 +819,7 @@ export class App extends PureComponent<Props, State> {
         allowRunOnSave: config.allowRunOnSave,
         hideTopBar: config.hideTopBar,
         hideSidebarNav: config.hideSidebarNav,
+        toolbarMode: config.toolbarMode,
         appPages: newSessionProto.appPages,
         currentPageScriptHash: newPageScriptHash,
         latestRunTime: performance.now(),
@@ -1338,17 +1365,20 @@ export class App extends PureComponent<Props, State> {
       : false
   }
 
-  settingsCallback = (animateModal = true): void => {
+  settingsCallback = (
+    developmentMode: boolean,
+    allowRunOnSave: boolean
+  ): void => {
     const newDialog: DialogProps = {
       type: DialogType.SETTINGS,
       isServerConnected: this.isServerConnected(),
       settings: this.state.userSettings,
-      allowRunOnSave: this.state.allowRunOnSave,
+      allowRunOnSave: allowRunOnSave,
       onSave: this.saveSettings,
       onClose: () => {},
-      developerMode: this.state.developerMode,
+      developerMode: developmentMode,
       openThemeCreator: this.openThemeCreatorDialog,
-      animateModal,
+      animateModal: true,
       metricsMgr: this.metricsMgr,
     }
     this.openDialog(newDialog)
@@ -1442,7 +1472,7 @@ export class App extends PureComponent<Props, State> {
 
   render(): JSX.Element {
     const {
-      allowRunOnSave,
+      allowRunOnSave: allowRunOnSaveState,
       connectionState,
       dialog,
       elements,
@@ -1457,7 +1487,14 @@ export class App extends PureComponent<Props, State> {
       hideSidebarNav,
       currentPageScriptHash,
     } = this.state
-
+    const developmentMode = showDevelopmentMenu(
+      this.props.hostCommunication.currentState.isOwner,
+      this.state.toolbarMode
+    )
+    const allowRunOnSave =
+      typeof allowRunOnSaveState === "boolean"
+        ? allowRunOnSaveState
+        : developmentMode
     const { hideSidebarNav: hostHideSidebarNav } =
       this.props.hostCommunication.currentState
 
@@ -1538,7 +1575,9 @@ export class App extends PureComponent<Props, State> {
                 isServerConnected={this.isServerConnected()}
                 quickRerunCallback={this.rerunScript}
                 clearCacheCallback={this.openClearCacheDialog}
-                settingsCallback={this.settingsCallback}
+                settingsCallback={() =>
+                  this.settingsCallback(developmentMode, allowRunOnSave)
+                }
                 aboutCallback={this.aboutCallback}
                 printCallback={this.printCallback}
                 screencastCallback={this.screencastCallback}
@@ -1546,7 +1585,7 @@ export class App extends PureComponent<Props, State> {
                 hostMenuItems={
                   this.props.hostCommunication.currentState.menuItems
                 }
-                hostIsOwner={this.props.hostCommunication.currentState.isOwner}
+                developmentMode={developmentMode}
                 sendMessageToHost={this.props.hostCommunication.sendMessage}
                 gitInfo={gitInfo}
                 showDeployError={this.showDeployError}
@@ -1558,6 +1597,7 @@ export class App extends PureComponent<Props, State> {
                 canDeploy={this.sessionInfo.isSet && !this.sessionInfo.isHello}
                 menuItems={menuItems}
                 metricsMgr={this.metricsMgr}
+                toolbarMode={this.state.toolbarMode}
               />
             </Header>
 

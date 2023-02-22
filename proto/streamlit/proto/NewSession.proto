@@ -89,16 +89,26 @@ message Config {
   // See config option "mapbox.token".
   string mapbox_token = 4;
 
-  // See config option "server.allowRunOnSave".
-  bool allow_run_on_save = 5;
-
   // See config option "ui.hideTopBar".
   bool hide_top_bar = 6;
 
   // See config option "ui.hideSidebarNav".
   bool hide_sidebar_nav = 7;
 
+  // See config option "client.toolbarMode".
+  enum ToolbarMode {
+    AUTO = 0;
+    DEVELOPER = 1;
+    VIEWER = 2;
+    MINIMAL = 3;
+  }
+  ToolbarMode toolbar_mode = 8;
+
+  // See config option "server.allowRunOnSave".
+  optional bool allow_run_on_save = 9;
+
   reserved 1;
+  reserved 5;
 }
 
 // Custom theme configuration options. Like other config options, these are set

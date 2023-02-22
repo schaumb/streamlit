@@ -75,7 +75,7 @@ export interface StatusWidgetProps {
   stopScript: () => void
 
   /** Allows users to change user settings to allow rerun on save */
-  allowRunOnSave: boolean
+  allowRunOnSave: boolean | null
 
   theme: Theme
 }
