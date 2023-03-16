@@ -15,6 +15,7 @@
  */
 
 import React, { PureComponent, ReactNode } from "react"
+import { Global, css } from "@emotion/react"
 import moment from "moment"
 import { HotKeys, KeyMap } from "react-hotkeys"
 import { enableAllPlugins as enableImmerPlugins } from "immer"
@@ -1422,6 +1423,36 @@ export class App extends PureComponent<Props, State> {
       currentPageScriptHash,
     } = this.state
 
+    // WIP: Render SiS fonts globally through emotion. We'll later on replace the URLs below with the one that's used to server Inter in Snowsight
+    const sisFonts = css`
+      @font-face {
+        font-family: "Inter";
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+        src: url("https://rsms.me/inter/font-files/Inter-Regular.woff2?v=3.19")
+          format("woff2");
+      }
+
+      @font-face {
+        font-family: "Inter";
+        font-weight: 600;
+        font-style: normal;
+        font-display: swap;
+        src: url("https://rsms.me/inter/font-files/Inter-SemiBold.woff2?v=3.19")
+          format("woff2");
+      }
+
+      @font-face {
+        font-family: "Inter";
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+        src: url("https://rsms.me/inter/font-files/Inter-Bold.woff2?v=3.19")
+          format("woff2");
+      }
+    `
+
     const { hideSidebarNav: hostHideSidebarNav } =
       this.props.hostCommunication.currentState
 
@@ -1476,6 +1507,7 @@ export class App extends PureComponent<Props, State> {
           attach={window}
           focused={true}
         >
+          <Global styles={sisFonts} />
           <StyledApp className={outerDivClass}>
             {/* The tabindex below is required for testing. */}
             <Header>
