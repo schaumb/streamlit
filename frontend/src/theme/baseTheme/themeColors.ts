@@ -41,4 +41,8 @@ export default {
   blue: colors.blue80,
   green: colors.green80,
   yellow: colors.yellow80,
+
+  // TODO: Pipe this through Python
+  widgetBackgroundColor: "#FAFAFA",
+  widgetBorderColor: "#D3DAE8",
 }

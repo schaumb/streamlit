@@ -397,6 +397,14 @@ export const createEmotionTheme = (
     textColor: bodyText,
   } = parsedColors
 
+  // SiS-specific colors
+  const { widgetBackgroundColor, widgetBorderColor } = genericColors
+
+  const sisColors = {
+    ...(widgetBackgroundColor && { widgetBackgroundColor }),
+    ...(widgetBorderColor && { widgetBorderColor }),
+  }
+
   const newGenericColors = {
     ...genericColors,
     ...(primary && { primary }),
@@ -409,6 +417,7 @@ export const createEmotionTheme = (
     ...baseThemeConfig.emotion,
     colors: createEmotionColors(newGenericColors),
     genericColors: newGenericColors,
+    sisColors,
     genericFonts: {
       ...genericFonts,
       ...(parsedFont && {
