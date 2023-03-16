@@ -137,6 +137,10 @@ export const createThemeOverrides = (theme: Theme): Record<string, any> => {
     lineHeightTight: lineHeights.tight,
   }
 
+  const secondaryBg = colors.widgetBackgroundColor
+    ? colors.widgetBackgroundColor
+    : colors.secondaryBg
+
   return {
     borders: {
       radius100: radii.md,
@@ -177,7 +181,7 @@ export const createThemeOverrides = (theme: Theme): Record<string, any> => {
       primary: colors.primary,
       primaryA: colors.primary,
       backgroundPrimary: colors.bgColor,
-      backgroundSecondary: colors.secondaryBg,
+      backgroundSecondary: secondaryBg,
       backgroundTertiary: colors.bgColor,
       borderOpaque: colors.darkenedBgMix25,
       accent: transparentize(colors.primary, 0.5),
@@ -190,16 +194,12 @@ export const createThemeOverrides = (theme: Theme): Record<string, any> => {
       tickFillDisabled: colors.fadedText40,
       tickMarkFill: colors.lightestGray,
       tickFillSelected: colors.primary,
-      datepickerBackground: inSidebar ? colors.secondaryBg : colors.bgColor,
-      calendarBackground: inSidebar ? colors.secondaryBg : colors.bgColor,
+      datepickerBackground: inSidebar ? secondaryBg : colors.bgColor,
+      calendarBackground: inSidebar ? secondaryBg : colors.bgColor,
       calendarForeground: colors.bodyText,
       calendarDayForegroundPseudoSelected: colors.bodyText,
-      calendarHeaderBackground: inSidebar
-        ? colors.bgColor
-        : colors.secondaryBg,
-      calendarHeaderBackgroundActive: inSidebar
-        ? colors.bgColor
-        : colors.secondaryBg,
+      calendarHeaderBackground: inSidebar ? colors.bgColor : secondaryBg,
+      calendarHeaderBackgroundActive: inSidebar ? colors.bgColor : secondaryBg,
       calendarHeaderForeground: colors.bodyText,
       calendarHeaderForegroundDisabled: colors.gray40,
       calendarDayBackgroundSelected: colors.primary,
@@ -219,27 +219,30 @@ export const createThemeOverrides = (theme: Theme): Record<string, any> => {
       notificationWarningText: colors.alertWarningTextColor,
       notificationNegativeBackground: colors.alertErrorBackgroundColor,
       notificationNegativeText: colors.alertErrorTextColor,
-      progressbarTrackFill: colors.secondaryBg,
+      progressbarTrackFill: secondaryBg,
 
       // mono100 overrides
       tickFill: colors.lightenedBg05, // Checkbox and Radio
       tickMarkFillDisabled: colors.lightenedBg05,
-      menuFill: theme.inSidebar ? colors.secondaryBg : colors.bgColor, // Dropdown BG
+      menuFill: theme.inSidebar ? secondaryBg : colors.bgColor, // Dropdown BG
 
       // mono200 overrides
       buttonDisabledFill: colors.lightenedBg05,
-      tickFillHover: colors.secondaryBg,
-      inputFillDisabled: colors.secondaryBg,
-      inputFillActive: colors.secondaryBg,
+      tickFillHover: secondaryBg,
+      inputFillDisabled: secondaryBg,
+      inputFillActive: secondaryBg,
 
       // mono300 overrides
-      toggleTrackFillDisabled: colors.secondaryBg,
-      tickFillActive: colors.secondaryBg,
-      sliderTrackFillDisabled: colors.secondaryBg,
-      inputBorder: colors.secondaryBg,
-      inputFill: colors.secondaryBg,
-      inputEnhanceFill: colors.secondaryBg,
-      inputEnhancerFillDisabled: colors.secondaryBg,
+      toggleTrackFillDisabled: secondaryBg,
+      tickFillActive: secondaryBg,
+      sliderTrackFillDisabled: secondaryBg,
+      inputBorder: colors.widgetBorderColor
+        ? colors.widgetBorderColor
+        : secondaryBg,
+      // When inside the sidebar, we flip the values of bgColor and secondaryBg, that's why here colors.secondaryBg === colors.bgColor
+      inputFill: theme.inSidebar ? colors.secondaryBg : secondaryBg,
+      inputEnhanceFill: secondaryBg,
+      inputEnhancerFillDisabled: secondaryBg,
 
       // mono400 overrides
       buttonDisabledSpinnerBackground: colors.gray40,
@@ -324,6 +327,10 @@ export const createEmotionColors = (genericColors: {
   [key: string]: string
 }): { [key: string]: string } => {
   const derivedColors = computeDerivedColors(genericColors)
+  const secondaryBg = genericColors.widgetBackgroundColor
+    ? genericColors.widgetBackgroundColor
+    : genericColors.secondaryBg
+
   return {
     ...genericColors,
     ...derivedColors,
@@ -349,10 +356,7 @@ export const createEmotionColors = (genericColors: {
     codeHighlightColor: derivedColors.bgMix,
 
     docStringModuleText: genericColors.bodyText,
-    docStringContainerBackground: transparentize(
-      genericColors.secondaryBg,
-      0.6
-    ),
+    docStringContainerBackground: transparentize(secondaryBg, 0.6),
 
     headingColor: genericColors.bodyText,
   }
@@ -397,14 +401,6 @@ export const createEmotionTheme = (
     textColor: bodyText,
   } = parsedColors
 
-  // SiS-specific colors
-  const { widgetBackgroundColor, widgetBorderColor } = genericColors
-
-  const sisColors = {
-    ...(widgetBackgroundColor && { widgetBackgroundColor }),
-    ...(widgetBorderColor && { widgetBorderColor }),
-  }
-
   const newGenericColors = {
     ...genericColors,
     ...(primary && { primary }),
@@ -417,7 +413,6 @@ export const createEmotionTheme = (
     ...baseThemeConfig.emotion,
     colors: createEmotionColors(newGenericColors),
     genericColors: newGenericColors,
-    sisColors,
     genericFonts: {
       ...genericFonts,
       ...(parsedFont && {
