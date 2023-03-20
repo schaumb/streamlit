@@ -1451,6 +1451,33 @@ export class App extends PureComponent<Props, State> {
         src: url("https://rsms.me/inter/font-files/Inter-Bold.woff2?v=3.19")
           format("woff2");
       }
+
+      @font-face {
+        font-family: "Apercu Mono Regular";
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+        src: url("https://app.snowflake.com/static/2c4863733dec5a69523e.woff2")
+          format("woff2");
+      }
+
+      @font-face {
+        font-family: "Apercu Mono Medium";
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+        src: url("https://app.snowflake.com/static/e903ae189d31a97e231e.woff2")
+          format("woff2");
+      }
+
+      @font-face {
+        font-family: "Apercu Mono Bold";
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+        src: url("https://app.snowflake.com/static/32447307374154c88bc0.woff2")
+          format("woff2");
+      }
     `
 
     const { hideSidebarNav: hostHideSidebarNav } =
