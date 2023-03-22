@@ -98,6 +98,20 @@ class SafeSessionState:
 
             return self._state.filtered_state
 
+    @property
+    def language(self) -> Optional[str]:
+        with self._lock:
+            if self._disconnected:
+                return None
+
+            try:
+                lang = self._state["language"]
+                if not lang:
+                    return None
+                return str(lang)
+            except KeyError:
+                return None
+
     def __getitem__(self, key: str) -> Any:
         with self._lock:
             if self._disconnected:
