@@ -62,4 +62,6 @@ export interface BaseBlockProps {
   widgetsDisabled: boolean
   componentRegistry: ComponentRegistry
   formsData: FormsData
+  openModalId?: string | null
+  closeModal: (() => void) | null | undefined
 }

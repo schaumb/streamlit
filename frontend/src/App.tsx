@@ -83,8 +83,9 @@ import {
   PageProfile,
   PagesChanged,
   SessionEvent,
-  SessionStatus,
+  UpdateModalStateEvent,
   WidgetStates,
+  SessionStatus,
 } from "src/autogen/proto"
 import { concat, noop, without } from "lodash"
 
@@ -161,6 +162,7 @@ interface State {
   appPages: IAppPage[]
   currentPageScriptHash: string
   latestRunTime: number
+  openModalId?: string | null
 }
 
 const ELEMENT_LIST_BUFFER_TIMEOUT_MS = 10
@@ -504,6 +506,8 @@ export class App extends PureComponent<Props, State> {
             deltaMsg,
             msgProto.metadata as ForwardMsgMetadata
           ),
+        updateModalStateEvent: (evtMsg: UpdateModalStateEvent) =>
+          this.handleUpdateModalStateEvent(evtMsg),
         pageConfigChanged: (pageConfig: PageConfig) =>
           this.handlePageConfigChanged(pageConfig),
         pageInfoChanged: (pageInfo: PageInfo) =>
@@ -625,6 +629,12 @@ export class App extends PureComponent<Props, State> {
         (performance.now() - this.state.latestRunTime) * 1000
       ),
     })
+  }
+
+  handleUpdateModalStateEvent = (
+    updateModalStateEventProto: UpdateModalStateEvent
+  ): void => {
+    this.setState({ openModalId: updateModalStateEventProto.openModalId })
   }
 
   /**
@@ -1030,6 +1040,17 @@ export class App extends PureComponent<Props, State> {
         this.widgetMgr.removeInactive(new Set([]))
       }
     )
+  }
+
+  /**
+   * Closes any currently open modal
+   */
+  closeModal(): void {
+    if (this.isServerConnected()) {
+      const backMsg = new BackMsg({ closeModal: true })
+      backMsg.type = "closeModal"
+      this.sendBackMsg(backMsg)
+    }
   }
 
   /**
@@ -1501,6 +1522,7 @@ export class App extends PureComponent<Props, State> {
       hideTopBar,
       hideSidebarNav,
       currentPageScriptHash,
+      openModalId,
     } = this.state
 
     const { hideSidebarNav: hostHideSidebarNav } =
@@ -1627,6 +1649,8 @@ export class App extends PureComponent<Props, State> {
               pageLinkBaseUrl={
                 this.props.hostCommunication.currentState.pageLinkBaseUrl
               }
+              openModalId={openModalId}
+              closeModal={this.closeModal.bind(this)}
             />
             {renderedDialog}
           </StyledApp>

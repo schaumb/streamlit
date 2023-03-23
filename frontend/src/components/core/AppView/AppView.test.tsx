@@ -59,6 +59,7 @@ function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
     currentPageScriptHash: "main_page_script_hash",
     hideSidebarNav: false,
     pageLinkBaseUrl: "",
+    closeModal: null,
     ...props,
   }
 }
