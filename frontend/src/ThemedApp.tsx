@@ -17,6 +17,8 @@
 import React from "react"
 import { BaseProvider } from "baseui"
 import { Global } from "@emotion/react"
+import { CustomThemeConfig } from "src/autogen/proto"
+import { sendMessageToHost } from "src/hocs/withHostCommunication"
 
 import ThemeProvider from "src/components/core/ThemeProvider"
 import {
@@ -29,6 +31,7 @@ import {
   removeCachedTheme,
   setCachedTheme,
   ThemeConfig,
+  createTheme,
 } from "src/theme"
 
 import AppWithScreencast from "./App"
@@ -71,9 +74,41 @@ const ThemedApp = (): JSX.Element => {
     setAvailableThemes([createAutoTheme(), ...constantThemes])
   }
 
+  const setImportedTheme = (themeConfig: CustomThemeConfig): void => {
+    const SNOWSIGHT_THEME_NAME = "Snowsight light"
+
+    // TODO: Depending on the Host->Guest API for setting custom themes,
+    // we may need to create the customThemeConfig proto here.
+    //
+    // For example:
+    // const customThemeConfig = new CustomThemeConfig()
+    // customThemeConfig.primaryColor = '#FAFAFA'
+
+    const customTheme = createTheme(SNOWSIGHT_THEME_NAME, themeConfig)
+    updateTheme(customTheme)
+  }
+
   React.useEffect(() => {
     const mediaMatch = window.matchMedia("(prefers-color-scheme: dark)")
     mediaMatch.addEventListener("change", updateAutoTheme)
+
+    // WIP: Mocking the host communication to update sis theme here for now.
+    // TODO: Remove after we've tested everything.
+    const customThemeConfig = new CustomThemeConfig()
+
+    customThemeConfig.primaryColor = "#1A6CE7"
+    customThemeConfig.backgroundColor = "#FFFFFF"
+    customThemeConfig.secondaryBackgroundColor = "#F0F2F6"
+    customThemeConfig.textColor = "#1E252F"
+    customThemeConfig.widgetBackgroundColor = "#FAFAFA"
+    customThemeConfig.widgetBorderColor = "#D3DAE8"
+
+    if (theme.name !== "Snowsight light") {
+      sendMessageToHost({
+        type: "SET_CUSTOM_THEME_CONFIG",
+        theme: customThemeConfig,
+      })
+    }
 
     return () => mediaMatch.removeEventListener("change", updateAutoTheme)
   }, [theme, availableThemes])
@@ -91,6 +126,7 @@ const ThemedApp = (): JSX.Element => {
             activeTheme: theme,
             addThemes,
             availableThemes,
+            setImportedTheme,
           }}
         />
         {/* The data grid requires one root level portal element for rendering cell overlays */}

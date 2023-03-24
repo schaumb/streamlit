@@ -399,6 +399,8 @@ export const createEmotionTheme = (
     backgroundColor: bgColor,
     primaryColor: primary,
     textColor: bodyText,
+    widgetBackgroundColor: widgetBackgroundColor,
+    widgetBorderColor: widgetBorderColor,
   } = parsedColors
 
   const newGenericColors = {
@@ -407,6 +409,8 @@ export const createEmotionTheme = (
     ...(bodyText && { bodyText }),
     ...(secondaryBg && { secondaryBg }),
     ...(bgColor && { bgColor }),
+    ...(widgetBackgroundColor && { widgetBackgroundColor }),
+    ...(widgetBorderColor && { widgetBorderColor }),
   }
 
   return {

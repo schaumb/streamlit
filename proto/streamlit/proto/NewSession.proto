@@ -121,6 +121,8 @@ message CustomThemeConfig {
   string text_color = 4;
   FontFamily font = 5;
   BaseTheme base = 6;
+  string widget_background_color = 7;
+  string widget_border_color = 8;
 }
 
 // Data that identifies the Streamlit app creator.

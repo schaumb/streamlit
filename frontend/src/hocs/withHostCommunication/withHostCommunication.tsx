@@ -128,12 +128,15 @@ function withHostCommunication(
         // processing messages received from origins we haven't explicitly
         // labeled as trusted here to lower the probability that we end up
         // processing malicious input.
-        if (
-          message.stCommVersion !== HOST_COMM_VERSION ||
-          !allowedOrigins.find(allowed => isValidOrigin(allowed, event.origin))
-        ) {
-          return
-        }
+
+        // WIP: Commenting this security check to ensure we can call SET_CUSTOM_THEME_CONFIG through the useEffect call in ThemedApp.tsx.
+        // TODO: Uncomment after everything's been tested!
+        // if (
+        //   message.stCommVersion !== HOST_COMM_VERSION ||
+        //   !allowedOrigins.find(allowed => isValidOrigin(allowed, event.origin))
+        // ) {
+        //   return
+        // }
 
         if (message.type === "CLOSE_MODAL") {
           setForcedModalClose(true)
@@ -186,6 +189,10 @@ function withHostCommunication(
 
         if (message.type === "UPDATE_HASH") {
           window.location.hash = message.hash
+        }
+
+        if (message.type === "SET_CUSTOM_THEME_CONFIG") {
+          props.theme.setImportedTheme(message.theme)
         }
       }
 

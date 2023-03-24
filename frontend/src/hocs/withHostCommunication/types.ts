@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IAppPage } from "src/autogen/proto"
+import { CustomThemeConfig, IAppPage } from "src/autogen/proto"
 import { ExportedTheme } from "src/theme"
 
 export type DeployedAppMetadata = {
@@ -108,6 +108,10 @@ export type IHostToGuestMessage = {
       type: "UPDATE_HASH"
       hash: string
     }
+  | {
+      type: "SET_CUSTOM_THEME_CONFIG"
+      theme: CustomThemeConfig
+    }
 )
 
 export type IGuestToHostMessage =
@@ -150,6 +154,10 @@ export type IGuestToHostMessage =
   | {
       type: "UPDATE_HASH"
       hash: string
+    }
+  | {
+      type: "SET_CUSTOM_THEME_CONFIG"
+      theme: CustomThemeConfig
     }
 
 export type VersionedMessage<Message> = {

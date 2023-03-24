@@ -36,7 +36,6 @@ export default {
   breakpoints,
   colors: createEmotionColors(genericColors),
   genericColors,
-  sisColors: {},
   fonts,
   fontSizes,
   fontWeights,
