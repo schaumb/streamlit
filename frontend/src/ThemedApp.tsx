@@ -100,8 +100,10 @@ const ThemedApp = (): JSX.Element => {
     customThemeConfig.backgroundColor = "#FFFFFF"
     customThemeConfig.secondaryBackgroundColor = "#F0F2F6"
     customThemeConfig.textColor = "#1E252F"
-    customThemeConfig.widgetBackgroundColor = "#FAFAFA"
+    customThemeConfig.widgetBackgroundColor = "#FFFFFF"
     customThemeConfig.widgetBorderColor = "#D3DAE8"
+    customThemeConfig.bodyFont = '"Inter", sans-serif'
+    customThemeConfig.codeFont = '"Apercu Mono", monospace'
 
     if (theme.name !== "Snowsight light") {
       sendMessageToHost({

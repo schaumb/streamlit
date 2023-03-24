@@ -128,6 +128,7 @@ export const createBaseThemePrimitives = (
 export const createThemeOverrides = (theme: Theme): Record<string, any> => {
   const { inSidebar, colors, genericFonts, fontSizes, lineHeights, radii } =
     theme
+
   const fontStyles = {
     fontFamily: genericFonts.bodyFont,
     fontSize: fontSizes.md,
@@ -420,8 +421,9 @@ export const createEmotionTheme = (
     genericFonts: {
       ...genericFonts,
       ...(parsedFont && {
-        bodyFont: parsedFont,
-        headingFont: parsedFont,
+        bodyFont: themeInput.bodyFont ? themeInput.bodyFont : parsedFont,
+        headingFont: themeInput.bodyFont ? themeInput.bodyFont : parsedFont,
+        codeFont: themeInput.codeFont ? themeInput.codeFont : parsedFont,
       }),
     },
   }
