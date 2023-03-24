@@ -104,6 +104,21 @@ const ThemedApp = (): JSX.Element => {
     customThemeConfig.widgetBorderColor = "#D3DAE8"
     customThemeConfig.bodyFont = '"Inter", sans-serif'
     customThemeConfig.codeFont = '"Apercu Mono", monospace'
+    customThemeConfig.customFontSizes = JSON.stringify({
+      twoSm: "10px",
+      sm: "12px",
+      md: ".8rem",
+      mdLg: "1rem",
+      lg: "1.125rem",
+      xl: "1.25rem",
+      twoXL: "1.5rem",
+      threeXL: "2rem",
+      fourXL: "2.5rem",
+
+      twoSmPx: 10,
+      smPx: 12,
+      mdPx: 14,
+    })
 
     if (theme.name !== "Snowsight light") {
       sendMessageToHost({

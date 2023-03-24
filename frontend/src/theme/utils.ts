@@ -418,6 +418,9 @@ export const createEmotionTheme = (
     ...baseThemeConfig.emotion,
     colors: createEmotionColors(newGenericColors),
     genericColors: newGenericColors,
+    ...(themeInput.customFontSizes && {
+      fontSizes: JSON.parse(themeInput.customFontSizes),
+    }),
     genericFonts: {
       ...genericFonts,
       ...(parsedFont && {
