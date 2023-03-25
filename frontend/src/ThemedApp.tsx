@@ -19,10 +19,12 @@ import { BaseProvider } from "baseui"
 import { Global } from "@emotion/react"
 import { CustomThemeConfig } from "src/autogen/proto"
 import { sendMessageToHost } from "src/hocs/withHostCommunication"
+import SnowsightFonts from "src/components/core/SnowsightFonts"
 
 import ThemeProvider from "src/components/core/ThemeProvider"
 import {
   AUTO_THEME_NAME,
+  SNOWSIGHT_LIGHT_THEME_NAME,
   createAutoTheme,
   createPresetThemes,
   getDefaultTheme,
@@ -41,6 +43,7 @@ const ThemedApp = (): JSX.Element => {
   const defaultTheme = getDefaultTheme()
 
   const [theme, setTheme] = React.useState<ThemeConfig>(defaultTheme)
+  const [fontURLs, setFontURLs] = React.useState<any>()
   const [availableThemes, setAvailableThemes] = React.useState<ThemeConfig[]>([
     ...createPresetThemes(),
     ...(isPresetTheme(defaultTheme) ? [] : [defaultTheme]),
@@ -75,16 +78,19 @@ const ThemedApp = (): JSX.Element => {
   }
 
   const setImportedTheme = (themeConfig: CustomThemeConfig): void => {
-    const SNOWSIGHT_THEME_NAME = "Snowsight light"
-
-    // TODO: Depending on the Host->Guest API for setting custom themes,
+    // TODO: Depending on the preferred Host->Guest API for setting custom themes,
     // we may need to create the customThemeConfig proto here.
     //
     // For example:
     // const customThemeConfig = new CustomThemeConfig()
     // customThemeConfig.primaryColor = '#FAFAFA'
 
-    const customTheme = createTheme(SNOWSIGHT_THEME_NAME, themeConfig)
+    // If fonts are coming from a URL, they need to be imported through the SnowsightFonts component.
+    // So let's store them in state so we can pass them as props
+    if (themeConfig.fontURLs) setFontURLs(themeConfig.fontURLs)
+
+    // Theme creation mechanism
+    const customTheme = createTheme(SNOWSIGHT_LIGHT_THEME_NAME, themeConfig)
     updateTheme(customTheme)
   }
 
@@ -92,38 +98,70 @@ const ThemedApp = (): JSX.Element => {
     const mediaMatch = window.matchMedia("(prefers-color-scheme: dark)")
     mediaMatch.addEventListener("change", updateAutoTheme)
 
-    // WIP: Mocking the host communication to update sis theme here for now.
+    // WIP: Mocking the host communication to update sis theme here to try things out.
     // TODO: Remove after we've tested everything.
-    const customThemeConfig = new CustomThemeConfig()
-
-    customThemeConfig.primaryColor = "#1A6CE7"
-    customThemeConfig.backgroundColor = "#FFFFFF"
-    customThemeConfig.secondaryBackgroundColor = "#F0F2F6"
-    customThemeConfig.textColor = "#1E252F"
-    customThemeConfig.widgetBackgroundColor = "#FFFFFF"
-    customThemeConfig.widgetBorderColor = "#D3DAE8"
-    customThemeConfig.bodyFont = '"Inter", sans-serif'
-    customThemeConfig.codeFont = '"Apercu Mono", monospace'
-    customThemeConfig.customFontSizes = JSON.stringify({
-      twoSm: "10px",
-      sm: "12px",
-      md: ".8rem",
-      mdLg: "1rem",
-      lg: "1.125rem",
-      xl: "1.25rem",
-      twoXL: "1.5rem",
-      threeXL: "2rem",
-      fourXL: "2.5rem",
-
-      twoSmPx: 10,
-      smPx: 12,
-      mdPx: 14,
-    })
-
-    if (theme.name !== "Snowsight light") {
+    if (theme.name !== SNOWSIGHT_LIGHT_THEME_NAME) {
       sendMessageToHost({
         type: "SET_CUSTOM_THEME_CONFIG",
-        theme: customThemeConfig,
+        theme: {
+          primaryColor: "#1A6CE7",
+          backgroundColor: "#FFFFFF",
+          secondaryBackgroundColor: "#F2F2F2",
+          textColor: "#1A1D21",
+          widgetBackgroundColor: "#FFFFFF",
+          widgetBorderColor: "#D3DAE8",
+          font: 0,
+          base: 0,
+          bodyFont: '"Inter", "Source Sans Pro", sans-serif',
+          codeFont: '"Apercu Mono", "Source Code Pro", monospace',
+          fontURLs: [
+            {
+              family: "Inter",
+              url: "https://rsms.me/inter/font-files/Inter-Regular.woff2?v=3.19",
+              weight: 400,
+            },
+            {
+              family: "Inter",
+              url: "https://rsms.me/inter/font-files/Inter-SemiBold.woff2?v=3.19",
+              weight: 600,
+            },
+            {
+              family: "Inter",
+              url: "https://rsms.me/inter/font-files/Inter-Bold.woff2?v=3.19",
+              weight: 700,
+            },
+            {
+              family: "Apercu Mono",
+              url: "https://app.snowflake.com/static/2c4863733dec5a69523e.woff2",
+              weight: 400,
+            },
+            {
+              family: "Apercu Mono",
+              url: "https://app.snowflake.com/static/e903ae189d31a97e231e.woff2",
+              weight: 500,
+            },
+            {
+              family: "Apercu Mono",
+              url: "https://app.snowflake.com/static/32447307374154c88bc0.woff2",
+              weight: 700,
+            },
+          ],
+          customFontSizes: JSON.stringify({
+            twoSm: "10px",
+            sm: "12px",
+            md: ".8rem",
+            mdLg: "1rem",
+            lg: "1.125rem",
+            xl: "1.25rem",
+            twoXL: "1.5rem",
+            threeXL: "2rem",
+            fourXL: "2.5rem",
+
+            twoSmPx: 10,
+            smPx: 12,
+            mdPx: 14,
+          }),
+        },
       })
     }
 
@@ -137,6 +175,10 @@ const ThemedApp = (): JSX.Element => {
     >
       <ThemeProvider theme={theme.emotion} baseuiTheme={theme.basewebTheme}>
         <Global styles={globalStyles} />
+        {/* If we're using snowsight's theme, load their fonts globally through the provided URLs */}
+        {theme.name === SNOWSIGHT_LIGHT_THEME_NAME && fontURLs && (
+          <SnowsightFonts fontURLs={fontURLs} />
+        )}
         <AppWithScreencast
           theme={{
             setTheme: updateTheme,

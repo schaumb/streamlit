@@ -15,7 +15,6 @@
  */
 
 import React, { PureComponent, ReactNode } from "react"
-import { Global, css } from "@emotion/react"
 import moment from "moment"
 import { HotKeys, KeyMap } from "react-hotkeys"
 import { enableAllPlugins as enableImmerPlugins } from "immer"
@@ -1477,66 +1476,6 @@ export class App extends PureComponent<Props, State> {
           attach={window}
           focused={true}
         >
-          {/* WIP: Render SiS fonts globally through emotion if using their theme. We'll later on replace the URLs below with the one that's used to server Inter in Snowsight */}
-          {this.props.theme.activeTheme.name === "Snowsight light" && (
-            <Global
-              styles={css`
-                @font-face {
-                  font-family: "Inter";
-                  font-weight: 400;
-                  font-style: normal;
-                  font-display: swap;
-                  src: url("https://rsms.me/inter/font-files/Inter-Regular.woff2?v=3.19")
-                    format("woff2");
-                }
-
-                @font-face {
-                  font-family: "Inter";
-                  font-weight: 600;
-                  font-style: normal;
-                  font-display: swap;
-                  src: url("https://rsms.me/inter/font-files/Inter-SemiBold.woff2?v=3.19")
-                    format("woff2");
-                }
-
-                @font-face {
-                  font-family: "Inter";
-                  font-weight: 700;
-                  font-style: normal;
-                  font-display: swap;
-                  src: url("https://rsms.me/inter/font-files/Inter-Bold.woff2?v=3.19")
-                    format("woff2");
-                }
-
-                @font-face {
-                  font-family: "Apercu Mono Regular";
-                  font-weight: 400;
-                  font-style: normal;
-                  font-display: swap;
-                  src: url("https://app.snowflake.com/static/2c4863733dec5a69523e.woff2")
-                    format("woff2");
-                }
-
-                @font-face {
-                  font-family: "Apercu Mono Medium";
-                  font-weight: 500;
-                  font-style: normal;
-                  font-display: swap;
-                  src: url("https://app.snowflake.com/static/e903ae189d31a97e231e.woff2")
-                    format("woff2");
-                }
-
-                @font-face {
-                  font-family: "Apercu Mono Bold";
-                  font-weight: 700;
-                  font-style: normal;
-                  font-display: swap;
-                  src: url("https://app.snowflake.com/static/32447307374154c88bc0.woff2")
-                    format("woff2");
-                }
-              `}
-            />
-          )}
           <StyledApp className={outerDivClass}>
             {/* The tabindex below is required for testing. */}
             <Header>

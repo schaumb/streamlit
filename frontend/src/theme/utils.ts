@@ -43,6 +43,7 @@ import {
 import { fonts } from "./primitives/typography"
 
 export const AUTO_THEME_NAME = "Use system setting"
+export const SNOWSIGHT_LIGHT_THEME_NAME = "Snowsight light"
 export const CUSTOM_THEME_NAME = "Custom Theme"
 
 export const isPresetTheme = (themeConfig: ThemeConfig): boolean => {
