@@ -43,7 +43,7 @@ const ThemedApp = (): JSX.Element => {
   const defaultTheme = getDefaultTheme()
 
   const [theme, setTheme] = React.useState<ThemeConfig>(defaultTheme)
-  const [fontURLs, setFontURLs] = React.useState<any>()
+  const [fontURLs, setFontURLs] = React.useState<string>()
   const [availableThemes, setAvailableThemes] = React.useState<ThemeConfig[]>([
     ...createPresetThemes(),
     ...(isPresetTheme(defaultTheme) ? [] : [defaultTheme]),
@@ -87,7 +87,7 @@ const ThemedApp = (): JSX.Element => {
 
     // If fonts are coming from a URL, they need to be imported through the SnowsightFonts component.
     // So let's store them in state so we can pass them as props
-    if (themeConfig.fontURLs) setFontURLs(themeConfig.fontURLs)
+    if (themeConfig.fontURLs) setFontURLs(JSON.stringify(themeConfig.fontURLs))
 
     // Theme creation mechanism
     const customTheme = createTheme(SNOWSIGHT_LIGHT_THEME_NAME, themeConfig)
@@ -177,7 +177,7 @@ const ThemedApp = (): JSX.Element => {
         <Global styles={globalStyles} />
         {/* If we're using snowsight's theme, load their fonts globally through the provided URLs */}
         {theme.name === SNOWSIGHT_LIGHT_THEME_NAME && fontURLs && (
-          <SnowsightFonts fontURLs={fontURLs} />
+          <SnowsightFonts fontURLs={JSON.parse(fontURLs)} />
         )}
         <AppWithScreencast
           theme={{
